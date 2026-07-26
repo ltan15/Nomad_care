@@ -136,6 +136,22 @@
   .switch-track.on{ background:var(--danger); }
   .switch-track.on::after{ transform:translateX(18px); background:#fff; }
 
+  .sos-btn{
+    width:100%; padding:22px; border:none; border-radius:12px; cursor:pointer;
+    background:var(--danger); color:#fff; font-size:20px; font-weight:800;
+    font-family:'Barlow Condensed',sans-serif; letter-spacing:0.06em;
+    box-shadow:0 0 0 rgba(224,80,58,0.5);
+  }
+  .sos-btn:hover{ filter:brightness(1.08); }
+  .sos-btn:disabled{ opacity:.5; cursor:not-allowed; }
+  .sos-btn.urgent{ animation:sosPulse 1.1s ease-in-out infinite; }
+  @keyframes sosPulse{
+    0%{ box-shadow:0 0 0 0 rgba(224,80,58,0.55); }
+    70%{ box-shadow:0 0 0 16px rgba(224,80,58,0); }
+    100%{ box-shadow:0 0 0 0 rgba(224,80,58,0); }
+  }
+  #sosCard.urgent{ border-color:var(--danger); }
+
   .cpr-wrap{ display:flex; gap:24px; flex-wrap:wrap; align-items:center; }
   .cpr-stats{ display:flex; gap:20px; }
   .cpr-stat{ text-align:center; }
@@ -145,6 +161,7 @@
   @keyframes compress{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(13px);} }
 
   .flip-frame{ min-height:70px; }
+  .fa-illust{ width:220px; height:110px; background:#14181e; border:1px solid var(--border); border-radius:8px; display:block; }
   .step-dots{ display:flex; gap:6px; margin-top:14px; }
   .step-dot{ width:8px; height:8px; border-radius:50%; background:var(--border); }
   .step-dot.on{ background:var(--signal); }
@@ -226,17 +243,19 @@
 
         <div class="card">
           <h3>NGÔN NGỮ ĐÍCH (BẢN ĐỊA)</h3>
-          <select id="targetLang" onchange="renderPhrase()">
-            <option value="th">Tiếng Thái</option>
-            <option value="es">Español (Mỹ Latinh / Tây Ban Nha)</option>
-            <option value="fr">Français (Pháp / Bắc Phi)</option>
-            <option value="zh">中文 (Trung Quốc)</option>
-            <option value="ja">日本語 (Nhật Bản)</option>
-            <option value="ko">한국어 (Hàn Quốc)</option>
-            <option value="lo">Tiếng Lào</option>
-            <option value="km">Tiếng Khmer</option>
-            <option value="en">English</option>
-          </select>
+          <label>Gõ tên ngôn ngữ (vd: "Tiếng Thái", "English", "日本語"...) hoặc chọn từ gợi ý</label>
+          <input type="text" id="targetLangInput" list="langOptions" value="Tiếng Thái" oninput="renderPhrase()" placeholder="Nhập ngôn ngữ bản địa...">
+          <datalist id="langOptions">
+            <option value="Tiếng Thái">
+            <option value="Español (Mỹ Latinh / Tây Ban Nha)">
+            <option value="Français (Pháp / Bắc Phi)">
+            <option value="中文 (Trung Quốc)">
+            <option value="日本語 (Nhật Bản)">
+            <option value="한국어 (Hàn Quốc)">
+            <option value="Tiếng Lào">
+            <option value="Tiếng Khmer">
+            <option value="English">
+          </datalist>
         </div>
 
         <div class="card"><h3>BƯỚC 1 — BỘ PHẬN CƠ THỂ</h3><div class="chip-row" id="step1"></div></div>
@@ -257,36 +276,42 @@
       <!-- MOD 2 -->
       <section class="module" id="mod2">
         <h2>Bản đồ vector cứu hộ</h2>
-        <p class="desc">Không tải ảnh bản đồ — chỉ lưu tọa độ GPS của cơ sở y tế đã xác thực, đóng gói theo từng gói dữ liệu khu vực (regional data pack) để tải trước cho bất kỳ nơi nào trên thế giới — từ trung tâm thành phố phủ sóng tốt đến núi cao, sa mạc, rừng sâu hẻo lánh. Tìm điểm gần nhất bằng Haversine, sau đó vẽ đường đi + đọc chỉ đường bằng giọng nói.</p>
+        <p class="desc">Vị trí của bạn được xác định <b>tự động</b> qua GPS của thiết bị (Geolocation API) — không cần nhập gì cả. Hệ thống lập tức tìm cơ sở y tế gần nhất từ dữ liệu offline đã đóng gói theo khu vực (regional data pack), rồi vẽ đường đi + đọc chỉ đường bằng giọng nói.</p>
 
         <div class="card">
-          <h3>VỊ TRÍ HIỆN TẠI (MÔ PHỎNG GPS THỤ ĐỘNG)</h3>
-          <div class="row">
-            <div class="field"><label>Chọn vị trí giả lập (toàn cầu)</label>
-              <select id="userPreset" onchange="applyPreset()">
-                <option value="custom">— Tùy chỉnh —</option>
-                <optgroup label="Vùng hẻo lánh, ít/không có sóng">
-                  <option value="0">Cung trekking Everest, Nepal</option>
-                  <option value="1">Cao nguyên Andes, gần Cusco, Peru</option>
-                  <option value="2">Rìa sa mạc Sahara, Morocco</option>
-                  <option value="3">Cao nguyên Scotland, Vương quốc Anh</option>
-                </optgroup>
-                <optgroup label="Đô thị lớn, phủ sóng đầy đủ">
-                  <option value="4">Trung tâm Singapore</option>
-                  <option value="5">Trung tâm Tokyo, Nhật Bản</option>
-                  <option value="6">Trung tâm London, Anh</option>
-                  <option value="7">Trung tâm Bogotá, Colombia</option>
-                </optgroup>
-              </select>
+          <h3>VỊ TRÍ CỦA BẠN</h3>
+          <p class="desc" id="geoStatus" style="margin:0 0 12px;">📍 Đang tự động xác định vị trí của bạn...</p>
+          <button class="action" onclick="detectUserLocation()">🔄 Xác định lại vị trí GPS</button>
+
+          <details style="margin-top:16px;">
+            <summary style="cursor:pointer; color:var(--text-muted); font-size:12.5px;">Nâng cao: mô phỏng vị trí khác (dùng khi test hoặc trình duyệt chặn quyền định vị)</summary>
+            <div class="row" style="margin-top:12px;">
+              <div class="field"><label>Vị trí giả lập (toàn cầu)</label>
+                <select id="userPreset" onchange="applyPreset()">
+                  <option value="custom">— Tùy chỉnh —</option>
+                  <optgroup label="Vùng hẻo lánh, ít/không có sóng">
+                    <option value="0">Cung trekking Everest, Nepal</option>
+                    <option value="1">Cao nguyên Andes, gần Cusco, Peru</option>
+                    <option value="2">Rìa sa mạc Sahara, Morocco</option>
+                    <option value="3">Cao nguyên Scotland, Vương quốc Anh</option>
+                  </optgroup>
+                  <optgroup label="Đô thị lớn, phủ sóng đầy đủ">
+                    <option value="4">Trung tâm Singapore</option>
+                    <option value="5">Trung tâm Tokyo, Nhật Bản</option>
+                    <option value="6">Trung tâm London, Anh</option>
+                    <option value="7">Trung tâm Bogotá, Colombia</option>
+                  </optgroup>
+                </select>
+              </div>
+              <div class="field"><label>Vĩ độ (lat)</label><input type="number" id="userLat" step="0.0001" value="27.8000"></div>
+              <div class="field"><label>Kinh độ (lng)</label><input type="number" id="userLng" step="0.0001" value="86.7000"></div>
             </div>
-            <div class="field"><label>Vĩ độ (lat)</label><input type="number" id="userLat" step="0.0001" value="27.8000"></div>
-            <div class="field"><label>Kinh độ (lng)</label><input type="number" id="userLng" step="0.0001" value="86.7000"></div>
-          </div>
-          <button class="action" onclick="findNearest()">Kích hoạt định vị &amp; tìm cơ sở gần nhất</button>
+            <button class="ghost" onclick="findNearest()">Dùng tọa độ này thay vì GPS thật</button>
+          </details>
         </div>
 
         <div class="card"><h3>SƠ ĐỒ VECTOR — ĐƯỜNG ĐI TỚI CƠ SỞ GẦN NHẤT</h3><svg class="mapviz" id="mapSvg" viewBox="0 0 600 220"></svg></div>
-        <div class="card"><h3>TOP 3 GẦN NHẤT</h3><div id="facilityList"><p class="desc">Nhấn nút phía trên để xem kết quả.</p></div></div>
+        <div class="card"><h3>TOP 3 GẦN NHẤT</h3><div id="facilityList"><p class="desc">Đang chờ xác định vị trí...</p></div></div>
 
         <div class="card" id="directionsCard" style="display:none;">
           <h3>CHỈ ĐƯỜNG BẰNG HÌNH ẢNH &amp; GIỌNG NÓI</h3>
@@ -375,8 +400,9 @@
         <p class="desc">Đồ thị các chặng đường (nhãn "có sóng"/"mất sóng" thu thập từ cộng đồng) áp dụng được cho bất kỳ cung đường hẻo lánh nào trên thế giới. Ví dụ bên dưới minh họa một cung trekking vùng núi cao. Dijkstra tìm lộ trình ngắn nhất, sau đó quét từng chặng để cảnh báo tải trước dữ liệu vùng mất sóng.</p>
         <div class="card">
           <div class="row">
-            <div class="field"><label>Điểm đi</label><select id="routeFrom"></select></div>
-            <div class="field"><label>Điểm đến</label><select id="routeTo"></select></div>
+            <div class="field"><label>Điểm đi (gõ tên địa điểm)</label><input type="text" id="routeFrom" list="routeNodesList" placeholder="vd: Lukla"></div>
+            <div class="field"><label>Điểm đến (gõ tên địa điểm)</label><input type="text" id="routeTo" list="routeNodesList" placeholder="vd: Everest Base Camp"></div>
+            <datalist id="routeNodesList"></datalist>
           </div>
           <button class="action" onclick="computeRoute()">Tính lộ trình &amp; quét vùng sóng</button>
         </div>
@@ -397,6 +423,13 @@
             <span id="sigLabel">Giả lập: đang có tín hiệu data</span>
           </label>
         </div>
+
+        <div class="card" id="sosCard">
+          <h3>TÍN HIỆU SOS KHẨN CẤP</h3>
+          <p class="desc" id="sosHint" style="margin:0 0 14px;">Nếu bạn gặp nguy hiểm, chỉ cần nhấn nút bên dưới — tín hiệu SOS kèm tọa độ GPS sẽ được gửi ngay tới máy chủ hệ thống NomadCare và liên hệ khẩn cấp (người thân/hostel), kể cả khi đang mất sóng data (qua SMS).</p>
+          <button class="sos-btn" id="sosBtn" onclick="sendSOS()">🆘 GỬI TÍN HIỆU SOS</button>
+        </div>
+
         <div class="card"><h3>NHẬT KÝ SỰ KIỆN</h3><div class="log" id="buddyLog"><div class="log-entry">Chưa có sự kiện nào.</div></div></div>
       </section>
 
@@ -427,7 +460,10 @@
 
         <!-- CPR (đặc biệt: có hoạt ảnh + đếm giờ) -->
         <div class="card fa-panel" id="fa-cpr" style="display:none;">
-          <h3>NHỊP ÉP TIM MÔ PHỎNG (~110 LẦN/PHÚT)</h3>
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:2px;">
+            <span style="font-size:28px;">❤️‍🩹</span>
+            <h3 style="margin:0;">NHỊP ÉP TIM MÔ PHỎNG (~110 LẦN/PHÚT)</h3>
+          </div>
           <div class="cpr-wrap">
             <svg width="160" height="150" viewBox="0 0 160 150">
               <ellipse cx="80" cy="110" rx="55" ry="26" fill="#2a323d" stroke="#3a4351"/>
@@ -444,17 +480,36 @@
           <p style="margin-top:14px;"><button class="action" id="cprBtn" onclick="startCPR()">▶ Bắt đầu mô phỏng 30 giây</button>
           <button class="ghost" onclick="stopCPR(false)" style="margin-left:8px;">⏸ Dừng</button></p>
           <p class="desc" style="margin-top:10px;">Ép giữa ngực, sâu ~5cm, để lồng ngực nảy lại hoàn toàn giữa các lần ép. Gọi cấp cứu trước khi bắt đầu nếu có thể.</p>
+          <p style="margin-top:10px;"><a id="cprVideoLink" href="#" target="_blank" rel="noopener" class="ghost" style="text-decoration:none; display:inline-block;">🎥 Xem video hướng dẫn CPR (cần mạng)</a></p>
         </div>
 
         <!-- GENERIC STEP VIEWER (dùng chung cho mọi chấn thương khác) -->
         <div class="card fa-panel" id="fa-generic" style="display:none;">
-          <h3 id="faGenericTitle">—</h3>
+          <div class="row" style="align-items:flex-end; margin-bottom:4px;">
+            <div class="field" style="flex:2; margin-bottom:0;">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <span id="faGenericIcon" style="font-size:28px;">🩹</span>
+                <h3 id="faGenericTitle" style="margin:0;">—</h3>
+              </div>
+            </div>
+            <div class="field" style="flex:1; margin-bottom:0;">
+              <label>Ngôn ngữ hiển thị</label>
+              <select id="faLang" onchange="renderGenericStep()">
+                <option value="vi">Tiếng Việt</option>
+                <option value="en">English</option>
+                <option value="es">Español</option>
+              </select>
+            </div>
+          </div>
+          <svg id="faIllustration" class="fa-illust" viewBox="0 0 220 110"></svg>
           <div class="flip-frame">
-            <p id="faGenericText" class="desc" style="margin:4px 0 0;"></p>
+            <p id="faGenericText" class="desc" style="margin:8px 0 0;"></p>
           </div>
           <div class="step-dots" id="faGenericDots"></div>
           <p style="margin-top:12px;"><button class="ghost" onclick="prevGenericStep()">← Trước</button>
           <button class="action" onclick="nextGenericStep()" style="margin-left:8px;">Bước tiếp theo →</button></p>
+          <p style="margin-top:10px;"><a id="faVideoLink" href="#" target="_blank" rel="noopener" class="ghost" style="text-decoration:none; display:inline-block;">🎥 Xem video hướng dẫn (cần mạng)</a></p>
+          <p class="desc" style="margin-top:8px;">Ngôn ngữ hiển thị hiện có: Tiếng Việt, English, Español. Các gói ngôn ngữ khác sẽ được bổ sung dần, cần chuyên gia y tế bản địa xác thực trước khi phát hành.</p>
         </div>
 
         <div class="card" id="faEmpty">
@@ -565,12 +620,38 @@ function renderStep3(){
     wrap.appendChild(b);
   });
 }
+// Bảng ánh xạ: tên ngôn ngữ người dùng gõ (hoặc mã) -> mã ngôn ngữ dùng tra bảng "phrases"
+const langMap = {
+  "tiếng thái": "th", "thai": "th", "th": "th",
+  "español (mỹ latinh / tây ban nha)": "es", "espanol": "es", "spanish": "es", "es": "es",
+  "français (pháp / bắc phi)": "fr", "francais": "fr", "french": "fr", "fr": "fr",
+  "中文 (trung quốc)": "zh", "中文": "zh", "chinese": "zh", "zh": "zh",
+  "日本語 (nhật bản)": "ja", "日本語": "ja", "japanese": "ja", "ja": "ja",
+  "한국어 (hàn quốc)": "ko", "한국어": "ko", "korean": "ko", "ko": "ko",
+  "tiếng lào": "lo", "lao": "lo", "lo": "lo",
+  "tiếng khmer": "km", "khmer": "km", "km": "km",
+  "english": "en", "en": "en", "tiếng anh": "en"
+};
+/** Tìm mã ngôn ngữ từ chuỗi người dùng gõ — khớp chính xác trước, rồi khớp gần đúng */
+function resolveLangCode(raw){
+  const s = (raw||"").trim().toLowerCase();
+  if(!s) return null;
+  if(langMap[s]) return langMap[s];
+  for(const key in langMap){ if(key.includes(s) || s.includes(key)) return langMap[key]; }
+  return null;
+}
 function renderPhrase(){
   const card = document.getElementById('resultCard');
   if(!treeState.severity){ card.style.display='none'; return; }
   const id = tree[treeState.part][treeState.symptom][treeState.severity];
-  const lang = document.getElementById('targetLang').value;
+  const lang = resolveLangCode(document.getElementById('targetLangInput').value);
   card.style.display='block';
+  if(!lang || !phrases[id][lang]){
+    document.getElementById('phraseOut').textContent = '⚠ Chưa nhận diện được ngôn ngữ này trong gói dữ liệu offline. Hãy chọn từ danh sách gợi ý.';
+    document.getElementById('phraseMeta').textContent = '';
+    document.getElementById('phraseBin').textContent = '';
+    return;
+  }
   document.getElementById('phraseOut').textContent = phrases[id][lang];
   document.getElementById('phraseMeta').textContent = `Mã triệu chứng: ${id} · Đường đi: ${treeState.part} → ${treeState.symptom} → ${treeState.severity}`;
   document.getElementById('phraseBin').textContent = 'Mã hóa nhị phân: ' + toBinary(id);
@@ -616,7 +697,30 @@ const presets = [
   {lat:27.8000,lng:86.7000}, {lat:-13.3000,lng:-72.0000}, {lat:31.0000,lng:-7.0000}, {lat:57.2000,lng:-4.6000},
   {lat:1.2897,lng:103.8501}, {lat:35.6762,lng:139.6503}, {lat:51.5074,lng:-0.1278}, {lat:4.7110,lng:-74.0721}
 ];
-function applyPreset(){ const v = document.getElementById('userPreset').value; if(v==='custom') return; const p = presets[+v]; document.getElementById('userLat').value = p.lat; document.getElementById('userLng').value = p.lng; }
+function applyPreset(){ const v = document.getElementById('userPreset').value; if(v==='custom') return; const p = presets[+v]; document.getElementById('userLat').value = p.lat; document.getElementById('userLng').value = p.lng; findNearest(); }
+
+/** Tự động xác định vị trí thật của người dùng bằng Geolocation API của trình duyệt.
+ *  Không cần người dùng nhập bất kỳ thông tin nào — thành công thì tự gọi findNearest(). */
+function detectUserLocation(){
+  const statusEl = document.getElementById('geoStatus');
+  if(!('geolocation' in navigator)){
+    statusEl.textContent = '⚠ Thiết bị/trình duyệt không hỗ trợ định vị GPS. Hãy dùng mục "Nâng cao" bên dưới để mô phỏng vị trí.';
+    return;
+  }
+  statusEl.textContent = '📍 Đang tự động xác định vị trí của bạn...';
+  navigator.geolocation.getCurrentPosition(
+    pos=>{
+      document.getElementById('userLat').value = pos.coords.latitude.toFixed(4);
+      document.getElementById('userLng').value = pos.coords.longitude.toFixed(4);
+      statusEl.textContent = `✅ Đã tự động xác định vị trí (độ chính xác ~${Math.round(pos.coords.accuracy)}m). Đang tìm cơ sở y tế gần nhất...`;
+      findNearest();
+    },
+    err=>{
+      statusEl.textContent = `⚠ Không lấy được vị trí tự động (${err.message}). Hãy mở mục "Nâng cao" bên dưới để mô phỏng vị trí, hoặc cấp quyền định vị rồi nhấn "Xác định lại vị trí GPS".`;
+    },
+    { enableHighAccuracy:true, timeout:10000, maximumAge:60000 }
+  );
+}
 function haversine(lat1,lng1,lat2,lng2){
   const R=6371; const toRad=d=>d*Math.PI/180;
   const dLat=toRad(lat2-lat1), dLng=toRad(lng2-lng1);
@@ -701,7 +805,8 @@ function drawMap(userLat,userLng,highlighted,routeInfo){
   s += `<circle cx="${x(userLng)}" cy="${y(userLat)}" r="7" class="dot-user"/><text x="${x(userLng)+9}" y="${y(userLat)-8}" fill="#ff5a2b" font-size="11" font-weight="bold">BẠN</text>`;
   svg.innerHTML = s;
 }
-drawMap(27.8,86.7,null);
+drawMap(27.8,86.7,null); // vẽ tạm trong lúc chờ GPS
+detectUserLocation(); // tự động xác định vị trí ngay khi tải trang, không cần thao tác
 
 /* ============ MOD 3: SURVIVAL QR ============ */
 const qrLabels = {
@@ -775,16 +880,34 @@ function dijkstra(graph,start,end){
   const path=[]; let cur=end; while(cur){ path.unshift(cur); cur=prev[cur]; }
   return { path, total: dist[end] };
 }
-(function initRouteSelects(){
-  const nodes = Object.keys(graph); const from = document.getElementById('routeFrom'); const to = document.getElementById('routeTo');
-  nodes.forEach(n=>{ from.innerHTML += `<option value="${n}">${n}</option>`; to.innerHTML += `<option value="${n}">${n}</option>`; });
-  from.value = "Lukla"; to.value = "Everest Base Camp";
+(function initRouteNodes(){
+  const nodes = Object.keys(graph);
+  const dl = document.getElementById('routeNodesList');
+  nodes.forEach(n=>{ dl.innerHTML += `<option value="${n}">`; });
+  document.getElementById('routeFrom').value = "Lukla";
+  document.getElementById('routeTo').value = "Everest Base Camp";
 })();
+/** Khớp tên địa điểm người dùng gõ với node có sẵn trong đồ thị offline (không phân biệt hoa/thường, khoảng trắng) */
+function findGraphNode(input){
+  const norm = s=>s.trim().toLowerCase();
+  const target = norm(input);
+  if(!target) return null;
+  const keys = Object.keys(graph);
+  let match = keys.find(k=>norm(k)===target);
+  if(!match) match = keys.find(k=>norm(k).includes(target) || target.includes(norm(k)));
+  return match || null;
+}
 function computeRoute(){
-  const from = document.getElementById('routeFrom').value, to = document.getElementById('routeTo').value;
-  const { path, total } = dijkstra(graph, from, to);
+  const fromInput = document.getElementById('routeFrom').value, toInput = document.getElementById('routeTo').value;
+  const from = findGraphNode(fromInput), to = findGraphNode(toInput);
   document.getElementById('routeResult').style.display='block';
   const segsDiv = document.getElementById('routeSegs'); segsDiv.innerHTML='';
+  const warnDiv = document.getElementById('routeWarn'); warnDiv.innerHTML='';
+  if(!from || !to){
+    warnDiv.innerHTML = `<div class="warn-banner">⚠ Không tìm thấy "${!from?fromInput:toInput}" trong dữ liệu offline đã tải. Hãy gõ đúng tên điểm gợi ý (vd: Lukla, Namche Bazaar, Everest Base Camp...).</div>`;
+    return;
+  }
+  const { path, total } = dijkstra(graph, from, to);
   let deadKm = 0;
   for(let i=0;i<path.length-1;i++){
     const a=path[i], b=path[i+1], km=graph[a][b], sig=getSignal(a,b);
@@ -793,7 +916,6 @@ function computeRoute(){
     seg.innerHTML = `<span class="seg-badge ${sig==='ok'?'ok':'dead'}">${sig==='ok'?'CÓ SÓNG':'MẤT SÓNG'}</span><span>${a} → ${b}</span><span style="color:var(--text-muted);margin-left:auto;">${km} km</span>`;
     segsDiv.appendChild(seg);
   }
-  const warnDiv = document.getElementById('routeWarn');
   warnDiv.innerHTML = `<p style="color:var(--text-muted);font-size:13px;margin-top:10px;">Tổng quãng đường: ${total} km</p>`;
   if(deadKm>0) warnDiv.innerHTML += `<div class="warn-banner">⚠ Lộ trình có ${deadKm} km mất sóng. Bấm để tải trước dữ liệu y tế &amp; bản đồ ngoại tuyến cho đoạn này (~5MB).</div>`;
 }
@@ -804,6 +926,11 @@ function toggleSignalLoss(){
   signalLost = !signalLost;
   document.getElementById('sigTrack').classList.toggle('on', signalLost);
   document.getElementById('sigLabel').textContent = signalLost ? 'Giả lập: đã mất tín hiệu data' : 'Giả lập: đang có tín hiệu data';
+  document.getElementById('sosCard').classList.toggle('urgent', signalLost);
+  document.getElementById('sosBtn').classList.toggle('urgent', signalLost);
+  document.getElementById('sosHint').textContent = signalLost
+    ? '⚠ Bạn đang ở vùng MẤT SÓNG. Nếu gặp nguy hiểm, nhấn nút bên dưới — tín hiệu SOS sẽ được gửi qua SMS ngay cả khi không có data.'
+    : 'Nếu bạn gặp nguy hiểm, chỉ cần nhấn nút bên dưới — tín hiệu SOS kèm tọa độ GPS sẽ được gửi ngay tới máy chủ hệ thống NomadCare và liên hệ khẩn cấp (người thân/hostel), kể cả khi đang mất sóng data (qua SMS).';
   const log = document.getElementById('buddyLog');
   if(log.children.length===1 && log.children[0].textContent.includes('Chưa có')) log.innerHTML='';
   const now = new Date().toLocaleTimeString('vi-VN');
@@ -816,6 +943,16 @@ function toggleSignalLoss(){
     addLog(`🔄 <b>${now}</b> — Có mạng trở lại. Đồng bộ lịch sử GPS &amp; tin nhắn lên máy chủ bảo mật hoàn tất.`, 'ok');
   }
 }
+/** Nút SOS: chỉ 1 lần nhấn, gửi ngay tọa độ khẩn cấp — hoạt động cả khi mất sóng data (qua kênh SMS/vệ tinh tầm ngắn) */
+function sendSOS(){
+  const btn = document.getElementById('sosBtn');
+  btn.disabled = true;
+  const now = new Date().toLocaleTimeString('vi-VN');
+  const channel = signalLost ? 'qua SMS/kênh tín hiệu tầm ngắn (không cần data)' : 'qua Internet (kết nối trực tiếp máy chủ)';
+  addLog(`🆘 <b>${now}</b> — ĐÃ GỬI TÍN HIỆU SOS KHẨN CẤP ${channel}! Tọa độ hiện tại đã gửi tới máy chủ hệ thống NomadCare và liên hệ khẩn cấp (người thân/hostel).`, 'warn');
+  queueSync();
+  setTimeout(()=>{ btn.disabled = false; }, 6000);
+}
 function addLog(html, cls){ const log = document.getElementById('buddyLog'); const d = document.createElement('div'); d.className='log-entry '+cls; d.innerHTML=html; log.prepend(d); }
 
 /* ============ MOD 6: OFFLINE FIRST AID ============ */
@@ -825,105 +962,325 @@ const firstAidDB = {
   cpr: {
     name: "Ngừng tim / Ngừng thở (CPR)",
     tags: ["ngừng tim","ngừng thở","hồi sức","cpr","bất tỉnh không thở","tim ngừng đập"],
-    special: "cpr"
+    icon: "❤️‍🩹", special: "cpr",
+    translations: { en:{ name:"Cardiac / Respiratory arrest (CPR)" }, es:{ name:"Paro cardíaco / respiratorio (RCP)" } }
   },
   bandage: {
     name: "Vết thương hở / Chảy máu",
     tags: ["vết thương","chảy máu","đứt tay","rách da","trầy xước"],
+    icon: "🩹",
     steps: [
       "Rửa sạch vết thương bằng nước sạch, tránh chạm trực tiếp bằng tay.",
       "Đặt gạc vô trùng phủ kín vết thương.",
       "Quấn băng vòng quanh, lực vừa phải, không quá chặt.",
       "Cố định đầu băng, kiểm tra tuần hoàn (ngón tay/chân vẫn hồng ấm)."
-    ]
+    ],
+    translations: {
+      en:{ name:"Open wound / Bleeding", steps:[
+        "Rinse the wound with clean water; avoid touching it directly with bare hands.",
+        "Cover the wound completely with sterile gauze.",
+        "Wrap a bandage around it, firm but not too tight.",
+        "Secure the bandage end and check circulation (fingers/toes should stay warm and pink)."
+      ]},
+      es:{ name:"Herida abierta / Sangrado", steps:[
+        "Enjuague la herida con agua limpia; evite tocarla directamente con las manos.",
+        "Cubra la herida por completo con una gasa estéril.",
+        "Envuelva un vendaje alrededor, firme pero no demasiado apretado.",
+        "Asegure el extremo del vendaje y compruebe la circulación (los dedos deben mantenerse cálidos y rosados)."
+      ]}
+    }
   },
   splint: {
     name: "Gãy xương / Trật khớp",
     tags: ["gãy xương","trật khớp","gãy tay","gãy chân","biến dạng chi"],
+    icon: "🦴",
     steps: [
       "Không cố nắn thẳng xương gãy. Giữ nguyên tư thế bị thương.",
       "Đặt vật cứng (que gỗ, thanh nẹp) dọc hai bên chi bị gãy.",
       "Cố định nẹp bằng băng/vải ở phía trên và dưới vị trí gãy.",
       "Kiểm tra không quấn quá chặt, di chuyển nạn nhân đến cơ sở y tế gần nhất."
-    ]
+    ],
+    translations: {
+      en:{ name:"Broken bone / Dislocation", steps:[
+        "Do not try to straighten the broken bone. Keep the injured position as it is.",
+        "Place a rigid object (stick, splint) along both sides of the injured limb.",
+        "Secure the splint with bandage or cloth above and below the fracture site.",
+        "Check it isn't wrapped too tight, then move the victim to the nearest medical facility."
+      ]},
+      es:{ name:"Fractura / Dislocación", steps:[
+        "No intente enderezar el hueso roto. Mantenga la posición de la lesión tal como está.",
+        "Coloque un objeto rígido (palo, férula) a ambos lados de la extremidad lesionada.",
+        "Asegure la férula con vendas o tela por encima y por debajo del punto de fractura.",
+        "Verifique que no esté demasiado apretado y traslade a la víctima al centro médico más cercano."
+      ]}
+    }
   },
   burn: {
     name: "Bỏng (lửa / nước sôi / hóa chất)",
     tags: ["bỏng","phỏng","bỏng lửa","bỏng nước sôi","bỏng hóa chất"],
+    icon: "🔥",
     steps: [
       "Làm mát vết bỏng dưới vòi nước mát (không dùng đá) trong 10–20 phút.",
       "Tháo bỏ trang sức/quần áo gần vùng bỏng trước khi vết bỏng sưng lên.",
       "Che vết bỏng bằng gạc sạch, không dính; không bôi kem đánh răng/bơ/dầu lên vết bỏng.",
       "Nếu bỏng diện rộng, ở mặt/tay, hoặc bỏng sâu — tìm cấp cứu ngay."
-    ]
+    ],
+    translations: {
+      en:{ name:"Burn (fire / hot water / chemical)", steps:[
+        "Cool the burn under cool running water (not ice) for 10–20 minutes.",
+        "Remove jewelry/clothing near the burn before it swells.",
+        "Cover the burn with clean, non-stick gauze; do not apply toothpaste, butter, or oil.",
+        "If the burn is large, on the face/hands, or deep — seek emergency help immediately."
+      ]},
+      es:{ name:"Quemadura (fuego / agua caliente / química)", steps:[
+        "Enfríe la quemadura con agua corriente fresca (no hielo) durante 10 a 20 minutos.",
+        "Retire joyas/ropa cerca de la quemadura antes de que se hinche.",
+        "Cubra la quemadura con gasa limpia y no adherente; no aplique pasta de dientes, mantequilla ni aceite.",
+        "Si la quemadura es extensa, está en la cara/manos, o es profunda, busque ayuda de emergencia de inmediato."
+      ]}
+    }
   },
   foodpoison: {
     name: "Ngộ độc thực phẩm",
     tags: ["ngộ độc","ngộ độc thực phẩm","đau bụng nôn","tiêu chảy","nôn mửa"],
+    icon: "🤢",
     steps: [
       "Ngừng ăn thực phẩm nghi ngờ, giữ lại mẫu nếu có thể để xác định nguyên nhân.",
       "Uống nước/dung dịch bù điện giải từng ngụm nhỏ để tránh mất nước.",
       "Nghỉ ngơi, tránh đồ ăn đặc cho đến khi hết buồn nôn.",
       "Nếu nôn/tiêu chảy kéo dài, sốt cao, hoặc có máu — tìm cấp cứu ngay."
-    ]
+    ],
+    translations: {
+      en:{ name:"Food poisoning", steps:[
+        "Stop eating the suspected food; keep a sample if possible to identify the cause.",
+        "Sip water or oral rehydration solution slowly to avoid dehydration.",
+        "Rest and avoid solid food until nausea subsides.",
+        "If vomiting/diarrhea persists, high fever, or blood appears — seek emergency care immediately."
+      ]},
+      es:{ name:"Intoxicación alimentaria", steps:[
+        "Deje de comer el alimento sospechoso; guarde una muestra si es posible para identificar la causa.",
+        "Beba agua o suero de rehidratación oral a sorbos lentos para evitar la deshidratación.",
+        "Descanse y evite alimentos sólidos hasta que ceda la náusea.",
+        "Si el vómito o la diarrea persisten, hay fiebre alta o sangre, busque atención de emergencia de inmediato."
+      ]}
+    }
   },
   heatstroke: {
     name: "Sốc nhiệt / Say nắng",
     tags: ["say nắng","sốc nhiệt","kiệt sức vì nóng","trúng nắng","cảm nắng"],
+    icon: "☀️",
     steps: [
       "Đưa nạn nhân vào bóng râm hoặc nơi mát ngay lập tức.",
       "Cởi bớt quần áo, làm mát bằng khăn ướt hoặc quạt.",
       "Cho uống nước mát nếu còn tỉnh táo, từng ngụm nhỏ.",
       "Nếu lú lẫn, co giật, hoặc bất tỉnh — đây là cấp cứu, tìm trợ giúp ngay."
-    ]
+    ],
+    translations: {
+      en:{ name:"Heat stroke / Sunstroke", steps:[
+        "Move the person into shade or a cool place immediately.",
+        "Remove excess clothing; cool with wet cloths or a fan.",
+        "Give cool water in small sips if the person is still conscious.",
+        "If confused, seizing, or unconscious — this is an emergency, get help immediately."
+      ]},
+      es:{ name:"Golpe de calor / Insolación", steps:[
+        "Traslade a la persona a la sombra o a un lugar fresco de inmediato.",
+        "Quítele el exceso de ropa; enfríe con paños húmedos o un ventilador.",
+        "Dele agua fresca en pequeños sorbos si sigue consciente.",
+        "Si está confundida, convulsiona o pierde el conocimiento, es una emergencia; busque ayuda de inmediato."
+      ]}
+    }
   },
   bite: {
     name: "Rắn cắn / Côn trùng cắn",
     tags: ["rắn cắn","côn trùng cắn","ong đốt","bọ cạp cắn","kiến cắn"],
+    icon: "🐍",
     steps: [
       "Giữ bình tĩnh, hạn chế cử động vùng bị cắn/đốt để làm chậm lan độc.",
       "Rửa sạch vết cắn bằng nước, tháo trang sức gần vùng bị cắn.",
       "Cố định chi bị cắn ở vị trí thấp hơn tim; không rạch, hút hay garô vết thương.",
       "Tìm cấp cứu y tế ngay; nếu có thể, ghi nhớ đặc điểm con vật để nhận diện."
-    ]
+    ],
+    translations: {
+      en:{ name:"Snake / Insect bite or sting", steps:[
+        "Stay calm and limit movement of the bitten area to slow the spread of venom.",
+        "Wash the bite with water; remove jewelry near the area.",
+        "Keep the limb lower than the heart; do not cut, suck, or apply a tourniquet to the wound.",
+        "Seek medical help immediately; if possible, remember the animal's features for identification."
+      ]},
+      es:{ name:"Mordedura de serpiente / Picadura de insecto", steps:[
+        "Mantenga la calma y limite el movimiento de la zona afectada para retrasar la propagación del veneno.",
+        "Lave la mordedura con agua; retire joyas cercanas a la zona.",
+        "Mantenga la extremidad más baja que el corazón; no corte, succione ni aplique torniquete a la herida.",
+        "Busque ayuda médica de inmediato; si es posible, recuerde las características del animal para identificarlo."
+      ]}
+    }
   },
   drowning: {
     name: "Đuối nước / Ngạt nước",
     tags: ["đuối nước","ngạt nước","sặc nước","chết đuối"],
+    icon: "🌊",
     steps: [
       "Đưa nạn nhân ra khỏi nước, gọi cấp cứu ngay lập tức.",
       "Kiểm tra hô hấp; nếu không thở, bắt đầu hồi sức tim phổi (xem mục CPR).",
       "Nếu còn thở, đặt nạn nhân nằm nghiêng để nước/chất nôn thoát ra ngoài.",
       "Giữ ấm cho nạn nhân, theo dõi liên tục cho đến khi có nhân viên y tế."
-    ]
+    ],
+    translations: {
+      en:{ name:"Drowning / Near-drowning", steps:[
+        "Get the person out of the water and call for emergency help immediately.",
+        "Check breathing; if not breathing, begin CPR (see the CPR section).",
+        "If breathing, place the person in the recovery position so water/vomit can drain out.",
+        "Keep the person warm and monitor continuously until medical help arrives."
+      ]},
+      es:{ name:"Ahogamiento / Casi ahogamiento", steps:[
+        "Saque a la persona del agua y pida ayuda de emergencia de inmediato.",
+        "Compruebe la respiración; si no respira, inicie RCP (vea la sección de RCP).",
+        "Si respira, colóquela en posición de recuperación para que drene el agua o el vómito.",
+        "Manténgala abrigada y vigílela continuamente hasta que llegue ayuda médica."
+      ]}
+    }
   },
   hypothermia: {
     name: "Hạ thân nhiệt",
     tags: ["hạ thân nhiệt","lạnh cóng","nhiễm lạnh","cóng lạnh"],
+    icon: "❄️",
     steps: [
       "Đưa nạn nhân vào nơi kín gió, thay quần áo ướt bằng đồ khô.",
       "Làm ấm dần bằng chăn hoặc thân nhiệt người khác — tránh làm ấm đột ngột.",
       "Cho uống nước ấm nếu còn tỉnh táo; không dùng rượu hoặc caffein.",
       "Nếu run rẩy ngừng đột ngột hoặc lú lẫn — đây là dấu hiệu nặng, cần cấp cứu ngay."
-    ]
+    ],
+    translations: {
+      en:{ name:"Hypothermia", steps:[
+        "Move the person to a sheltered place; replace wet clothing with dry clothing.",
+        "Warm up gradually with blankets or body heat — avoid rapid rewarming.",
+        "Give warm drinks if conscious; avoid alcohol or caffeine.",
+        "If shivering suddenly stops or confusion appears — this is severe, seek emergency help."
+      ]},
+      es:{ name:"Hipotermia", steps:[
+        "Traslade a la persona a un lugar resguardado; cambie la ropa mojada por ropa seca.",
+        "Caliéntela gradualmente con mantas o calor corporal; evite el recalentamiento rápido.",
+        "Dele bebidas calientes si está consciente; evite el alcohol o la cafeína.",
+        "Si los escalofríos cesan de repente o aparece confusión, es grave; busque ayuda de emergencia."
+      ]}
+    }
   },
   anaphylaxis: {
     name: "Sốc phản vệ / Dị ứng nặng",
     tags: ["sốc phản vệ","dị ứng nặng","khó thở dị ứng","phản ứng dị ứng"],
+    icon: "⚠️",
     steps: [
       "Nếu nạn nhân có bút tiêm epinephrine tự động, hỗ trợ họ sử dụng theo hướng dẫn trên bút.",
       "Gọi cấp cứu ngay lập tức — đây là tình huống đe dọa tính mạng.",
       "Đặt nạn nhân nằm ngửa, kê cao chân (trừ khi khó thở thì cho ngồi).",
       "Theo dõi hô hấp liên tục; sẵn sàng hồi sức tim phổi (CPR) nếu ngừng thở."
-    ]
+    ],
+    translations: {
+      en:{ name:"Anaphylaxis / Severe allergic reaction", steps:[
+        "If the person has an epinephrine auto-injector, help them use it as directed on the device.",
+        "Call for emergency help immediately — this is a life-threatening situation.",
+        "Lay the person on their back with legs raised (unless breathing is difficult, then let them sit).",
+        "Monitor breathing continuously; be ready to perform CPR if breathing stops."
+      ]},
+      es:{ name:"Anafilaxia / Reacción alérgica grave", steps:[
+        "Si la persona tiene un autoinyector de epinefrina, ayúdela a usarlo según las instrucciones del dispositivo.",
+        "Pida ayuda de emergencia de inmediato: es una situación que pone en peligro la vida.",
+        "Recuéstela boca arriba con las piernas elevadas (a menos que le cueste respirar, en cuyo caso siéntela).",
+        "Vigile la respiración continuamente; esté listo para realizar RCP si deja de respirar."
+      ]}
+    }
   }
 };
 const quickChipIds = ["cpr","bandage","splint","burn","heatstroke","anaphylaxis"];
+/** Xây link tìm kiếm video hướng dẫn (mở khi có mạng) — không nhúng video cụ thể để tránh sai lệch nguồn */
+function videoSearchUrl(englishName){
+  return 'https://www.youtube.com/results?search_query=' + encodeURIComponent(englishName + ' first aid tutorial');
+}
+
+/* --- Hình minh họa vector lũy tiến theo từng bước (mỗi bước thêm 1 chi tiết vào hình) --- */
+const IL_DARK="#2a323d", IL_BORDER="#3a4351", IL_TEAL="#2bb3a3", IL_ORANGE="#ff5a2b", IL_DANGER="#e0503a", IL_TAN="#8b6f47", IL_MUTED="#8992a0", IL_WATER="#4aa8ff";
+const illustrationRenderers = {
+  bandage(idx){
+    let wraps=''; for(let i=0;i<=idx;i++){ wraps += `<rect x="${45+i*22}" y="35" width="14" height="40" fill="${IL_TEAL}" opacity="0.55"/>`; }
+    return `<rect x="20" y="35" width="180" height="40" rx="20" fill="${IL_DARK}" stroke="${IL_BORDER}"/>
+      <circle cx="70" cy="55" r="9" fill="${IL_DANGER}" opacity="0.8"/>${wraps}`;
+  },
+  splint(idx){
+    let rods='';
+    if(idx>=1) rods += `<rect x="35" y="38" width="150" height="6" rx="3" fill="${IL_TAN}"/><rect x="35" y="72" width="150" height="6" rx="3" fill="${IL_TAN}"/>`;
+    if(idx>=2) rods += `<rect x="60" y="30" width="10" height="55" fill="${IL_TEAL}" opacity="0.7"/><rect x="150" y="30" width="10" height="55" fill="${IL_TEAL}" opacity="0.7"/>`;
+    if(idx>=3) rods += `<circle cx="110" cy="56" r="4" fill="${IL_ORANGE}"/>`;
+    return `<rect x="30" y="45" width="160" height="22" rx="11" fill="${IL_DARK}" stroke="${IL_BORDER}"/>${rods}<circle cx="110" cy="20" r="5" fill="${IL_DANGER}" opacity="0.8"/>`;
+  },
+  burn(idx){
+    const drops = idx>=0 ? `<path d="M100,15 q4,8 0,12 q-4,-4 0,-12" fill="${IL_WATER}"/><path d="M115,10 q4,8 0,12 q-4,-4 0,-12" fill="${IL_WATER}"/>` : '';
+    const noJewel = idx>=1 ? `<circle cx="160" cy="55" r="7" fill="none" stroke="${IL_TEAL}" stroke-width="2"/><line x1="155" y1="50" x2="165" y2="60" stroke="${IL_DANGER}" stroke-width="2"/>` : '';
+    const gauze = idx>=2 ? `<rect x="85" y="42" width="35" height="26" rx="4" fill="#eae6df" opacity="0.92"/>` : '';
+    const warn = idx>=3 ? `<circle cx="190" cy="30" r="9" fill="none" stroke="${IL_DANGER}" stroke-width="2"/><text x="190" y="35" font-size="12" text-anchor="middle" fill="${IL_DANGER}">!</text>` : '';
+    return `<rect x="30" y="35" width="160" height="40" rx="18" fill="${IL_DARK}" stroke="${IL_BORDER}"/>
+      <ellipse cx="100" cy="55" rx="14" ry="12" fill="${idx>=2?'#eae6df':IL_ORANGE}" opacity="${idx>=2?0.9:0.85}"/>${drops}${noJewel}${gauze}${warn}`;
+  },
+  foodpoison(idx){
+    const waves = `<path d="M60,55 q10,-10 20,0 q10,10 20,0 q10,-10 20,0" stroke="${IL_DANGER}" stroke-width="2" fill="none" opacity="0.7"/>`;
+    const glass = idx>=1 ? `<rect x="150" y="40" width="16" height="24" fill="none" stroke="${IL_TEAL}" stroke-width="2"/><rect x="151" y="50" width="14" height="13" fill="${IL_TEAL}" opacity="0.5"/>` : '';
+    const zzz = idx>=2 ? `<text x="35" y="30" font-size="14" fill="${IL_MUTED}">Z z z</text>` : '';
+    const warn = idx>=3 ? `<circle cx="190" cy="75" r="9" fill="none" stroke="${IL_DANGER}" stroke-width="2"/><text x="190" y="80" font-size="12" text-anchor="middle" fill="${IL_DANGER}">!</text>` : '';
+    return `<circle cx="90" cy="55" r="30" fill="${IL_DARK}" stroke="${IL_BORDER}"/>${waves}${glass}${zzz}${warn}`;
+  },
+  heatstroke(idx){
+    const sun = `<circle cx="50" cy="40" r="16" fill="${IL_ORANGE}" opacity="${idx>=0?0.4:0.9}"/>`;
+    const shade = idx>=0 ? `<rect x="28" y="28" width="42" height="30" fill="${IL_DARK}" opacity="0.65"/>` : '';
+    const fan = idx>=1 ? `<path d="M108,45 q6,-6 12,0 q6,6 12,0" stroke="${IL_WATER}" stroke-width="2" fill="none"/>` : '';
+    const glass = idx>=2 ? `<rect x="160" y="40" width="16" height="24" fill="none" stroke="${IL_TEAL}" stroke-width="2"/>` : '';
+    const warn = idx>=3 ? `<circle cx="190" cy="70" r="9" fill="none" stroke="${IL_DANGER}" stroke-width="2"/><text x="190" y="75" font-size="12" text-anchor="middle" fill="${IL_DANGER}">!</text>` : '';
+    return `<rect x="10" y="75" width="200" height="12" fill="${IL_BORDER}" opacity="0.4"/>${sun}${shade}${fan}${glass}${warn}`;
+  },
+  bite(idx){
+    const limb = `<rect x="30" y="45" width="160" height="22" rx="11" fill="${IL_DARK}" stroke="${IL_BORDER}"/>`;
+    const mark = `<circle cx="100" cy="56" r="3" fill="${IL_DANGER}"/><circle cx="110" cy="56" r="3" fill="${IL_DANGER}"/>`;
+    const lock = idx>=0 ? `<rect x="18" y="22" width="14" height="10" rx="2" fill="none" stroke="${IL_TEAL}" stroke-width="2"/><path d="M21,22 v-4 a4,4 0 0 1 8,0 v4" fill="none" stroke="${IL_TEAL}" stroke-width="2"/>` : '';
+    const drop = idx>=1 ? `<path d="M155,15 q4,8 0,12 q-4,-4 0,-12" fill="${IL_WATER}"/>` : '';
+    const arrow = idx>=2 ? `<path d="M100,80 v14 m-5,-6 l5,6 l5,-6" stroke="${IL_ORANGE}" stroke-width="2" fill="none"/>` : '';
+    const warn = idx>=3 ? `<circle cx="190" cy="30" r="9" fill="none" stroke="${IL_DANGER}" stroke-width="2"/><text x="190" y="35" font-size="12" text-anchor="middle" fill="${IL_DANGER}">!</text>` : '';
+    return limb+mark+lock+drop+arrow+warn;
+  },
+  drowning(idx){
+    const wave = `<path d="M10,72 q15,-15 30,0 q15,15 30,0 q15,-15 30,0 q15,15 30,0 q15,-15 30,0 q15,15 30,0" stroke="${IL_WATER}" stroke-width="3" fill="none"/>`;
+    const arrowUp = idx>=0 ? `<path d="M110,40 v-14 m-5,6 l5,-6 l5,6" stroke="${IL_ORANGE}" stroke-width="2" fill="none"/>` : '';
+    const person = `<circle cx="110" cy="55" r="10" fill="${idx>=1?IL_TEAL:IL_ORANGE}"/>`;
+    const heart = idx>=1 ? `<text x="145" y="35" font-size="16">❤</text>` : '';
+    const recovery = idx>=2 ? `<ellipse cx="65" cy="30" rx="14" ry="7" fill="${IL_TEAL}" opacity="0.6"/>` : '';
+    const blanket = idx>=3 ? `<rect x="90" y="60" width="40" height="14" rx="4" fill="${IL_ORANGE}" opacity="0.6"/>` : '';
+    return wave+arrowUp+person+heart+recovery+blanket;
+  },
+  hypothermia(idx){
+    const snow = `<text x="30" y="35" font-size="18" fill="${IL_WATER}">❄</text>`;
+    const roof = idx>=0 ? `<path d="M80,25 l30,-15 l30,15" stroke="${IL_TEAL}" stroke-width="2" fill="none"/>` : '';
+    const person = `<circle cx="110" cy="55" r="12" fill="${idx>=1?IL_ORANGE:IL_WATER}" opacity="0.8"/>`;
+    const blanket = idx>=1 ? `<rect x="95" y="65" width="30" height="10" rx="3" fill="${IL_ORANGE}" opacity="0.6"/>` : '';
+    const cup = idx>=2 ? `<rect x="160" y="45" width="14" height="14" fill="none" stroke="${IL_TEAL}" stroke-width="2"/>` : '';
+    const warn = idx>=3 ? `<circle cx="190" cy="30" r="9" fill="none" stroke="${IL_DANGER}" stroke-width="2"/><text x="190" y="35" font-size="12" text-anchor="middle" fill="${IL_DANGER}">!</text>` : '';
+    return snow+roof+person+blanket+cup+warn;
+  },
+  anaphylaxis(idx){
+    const person = `<circle cx="90" cy="55" r="12" fill="${IL_DANGER}" opacity="0.7"/>`;
+    const injector = idx>=0 ? `<rect x="125" y="45" width="8" height="24" rx="3" fill="${IL_TEAL}"/>` : '';
+    const phone = idx>=1 ? `<text x="160" y="35" font-size="16">📞</text>` : '';
+    const recline = idx>=2 ? `<ellipse cx="55" cy="78" rx="20" ry="8" fill="${IL_TEAL}" opacity="0.5"/>` : '';
+    const monitor = idx>=3 ? `<path d="M150,70 h10 l4,-10 l6,20 l4,-10 h10" stroke="${IL_ORANGE}" stroke-width="2" fill="none"/>` : '';
+    return person+injector+phone+recline+monitor;
+  }
+};
+function renderIllustration(id, idx){
+  const svg = document.getElementById('faIllustration');
+  const renderer = illustrationRenderers[id];
+  svg.innerHTML = renderer ? renderer(idx) : '';
+}
 
 function initFirstAidUI(){
   const chipsWrap = document.getElementById('quickChips'); chipsWrap.innerHTML='';
   quickChipIds.forEach(id=>{
-    const b = document.createElement('button'); b.className='chip'; b.textContent = firstAidDB[id].name;
+    const b = document.createElement('button'); b.className='chip'; b.textContent = `${firstAidDB[id].icon||''} ${firstAidDB[id].name}`;
     b.onclick = ()=> selectFirstAid(id);
     chipsWrap.appendChild(b);
   });
@@ -942,7 +1299,7 @@ function renderSearchResults(){
     return;
   }
   matches.forEach(id=>{
-    const b = document.createElement('button'); b.className='chip'; b.textContent = firstAidDB[id].name;
+    const b = document.createElement('button'); b.className='chip'; b.textContent = `${firstAidDB[id].icon||''} ${firstAidDB[id].name}`;
     b.onclick = ()=> selectFirstAid(id);
     resultsWrap.appendChild(b);
   });
@@ -955,6 +1312,7 @@ function selectFirstAid(id){
   document.getElementById('fa-generic').style.display = 'none';
   if(entry.special === 'cpr'){
     document.getElementById('fa-cpr').style.display = 'block';
+    document.getElementById('cprVideoLink').href = videoSearchUrl(entry.translations.en.name);
   } else {
     genericState.id = id; genericState.step = 0;
     document.getElementById('fa-generic').style.display = 'block';
@@ -963,20 +1321,33 @@ function selectFirstAid(id){
   queueSync();
 }
 
-// --- Bộ hiển thị bước dùng chung (generic step viewer) ---
+// --- Bộ hiển thị bước dùng chung (generic step viewer), hỗ trợ đa ngôn ngữ ---
 const genericState = { id:null, step:0 };
+/** Lấy tên + các bước theo ngôn ngữ đang chọn; mặc định về tiếng Việt nếu chưa có bản dịch */
+function getLocalizedEntry(entry, lang){
+  if(lang==='vi' || !entry.translations || !entry.translations[lang]) return { name:entry.name, steps:entry.steps };
+  const t = entry.translations[lang];
+  return { name: t.name || entry.name, steps: t.steps || entry.steps };
+}
 function renderGenericStep(){
   if(!genericState.id) return;
   const entry = firstAidDB[genericState.id];
+  const lang = document.getElementById('faLang').value;
+  const loc = getLocalizedEntry(entry, lang);
   const idx = genericState.step;
-  document.getElementById('faGenericTitle').textContent = entry.name.toUpperCase();
-  document.getElementById('faGenericText').textContent = `Bước ${idx+1}/${entry.steps.length}: ${entry.steps[idx]}`;
+  document.getElementById('faGenericIcon').textContent = entry.icon || '🩹';
+  document.getElementById('faGenericTitle').textContent = loc.name.toUpperCase();
+  document.getElementById('faGenericText').textContent = `${idx+1}/${loc.steps.length}: ${loc.steps[idx]}`;
+  renderIllustration(genericState.id, idx);
   const dotsWrap = document.getElementById('faGenericDots'); dotsWrap.innerHTML = '';
-  entry.steps.forEach((_,i)=>{ const d=document.createElement('div'); d.className='step-dot'+(i<=idx?' on':''); dotsWrap.appendChild(d); });
+  loc.steps.forEach((_,i)=>{ const d=document.createElement('div'); d.className='step-dot'+(i<=idx?' on':''); dotsWrap.appendChild(d); });
+  document.getElementById('faVideoLink').href = videoSearchUrl(entry.translations && entry.translations.en ? entry.translations.en.name : entry.name);
 }
 function nextGenericStep(){
   const entry = firstAidDB[genericState.id];
-  if(genericState.step < entry.steps.length-1){ genericState.step++; renderGenericStep(); }
+  const lang = document.getElementById('faLang').value;
+  const loc = getLocalizedEntry(entry, lang);
+  if(genericState.step < loc.steps.length-1){ genericState.step++; renderGenericStep(); }
 }
 function prevGenericStep(){
   if(genericState.step > 0){ genericState.step--; renderGenericStep(); }
